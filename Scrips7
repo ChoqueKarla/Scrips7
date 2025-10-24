@@ -42,12 +42,12 @@ apt install -y haproxy || { echo "HAProxy no pudo ser instalado"; exit 1; }
 echo "Instalando UFW y configurando el firewall..." | tee -a "$LOG"
 apt install -y ufw iptables-persistent || { echo "UFW no pudo ser instalado"; exit 1; }
 
-# --- Habilitar servicios ---
+# --- Habilitar y arrancar servicios ---
 echo "Habilitando y arrancando servicios..." | tee -a "$LOG"
-# Usamos systemd-sysv-install para Apache2 si el comando systemctl falla
+# Usamos update-rc.d para habilitar Apache2 si systemctl falla
 if ! systemctl enable apache2; then
-  echo "apache2.service no es un servicio nativo, redirigiendo a systemd-sysv-install." | tee -a "$LOG"
-  /lib/systemd/systemd-sysv-install enable apache2 || { echo "No se pudo habilitar Apache2"; exit 1; }
+  echo "apache2.service no es un servicio nativo, redirigiendo a update-rc.d." | tee -a "$LOG"
+  sudo update-rc.d apache2 defaults || { echo "No se pudo habilitar Apache2"; exit 1; }
 fi
 
 systemctl enable --now mariadb
