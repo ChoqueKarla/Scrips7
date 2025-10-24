@@ -44,7 +44,12 @@ apt install -y ufw iptables-persistent || { echo "UFW no pudo ser instalado"; ex
 
 # --- Habilitar servicios ---
 echo "Habilitando y arrancando servicios..." | tee -a "$LOG"
-systemctl enable --now apache2
+# Usamos systemd-sysv-install para Apache2 si el comando systemctl falla
+if ! systemctl enable apache2; then
+  echo "apache2.service no es un servicio nativo, redirigiendo a systemd-sysv-install." | tee -a "$LOG"
+  /lib/systemd/systemd-sysv-install enable apache2 || { echo "No se pudo habilitar Apache2"; exit 1; }
+fi
+
 systemctl enable --now mariadb
 systemctl enable --now ssh
 systemctl enable --now haproxy
